@@ -33,7 +33,7 @@
     "tailwindcss": "^3.4.17"
   },
   "keywords": [],
-  "author": "obo14",
+  "author": "Deka5",
   "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",

@@ -7,9 +7,11 @@ let db;
 
 // 데이터베이스 초기화
 function initializeDatabase() {
-  db = new sqlite3.Database(path.join(__dirname, "database.db"), (err) => {
+  db = new sqlite3.Database("./database.db", (err) => {
     if (err) {
       console.error("데이터베이스 연결 오류", err.message);
+    } else {
+      console.log("데이터베이스에 연결되었습니다.");
     }
   });
 
@@ -19,6 +21,36 @@ function initializeDatabase() {
       content TEXT NOT NULL
     )`);
 }
+
+function getData(res) {
+  const query = `SELECT * FROM datalog`;
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      console.error("사용자 조회 오류:", err.message);
+      res([]);
+    } else {
+      res(rows);
+    }
+  });
+}
+
+ipcMain.handle("get-data", (event) => {
+  // 요청 처리
+  return new Promise((resolve) => {
+    getData(resolve);
+  });
+});
+
+ipcMain.handle("insert-data", (event) => {
+  console.log("insert data received");
+  db.run(`INSERT INTO datalog ( content ) VALUES ( 'DDFDFDFDF' )`, (err) => {
+    if (err) {
+      return console.log(err.message);
+    } else {
+      console.log("A row has been inserted");
+    }
+  });
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

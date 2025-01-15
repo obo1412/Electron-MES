@@ -29,10 +29,19 @@
 import "./index.css";
 
 document.getElementById("requestBtn").addEventListener("click", () => {
-  electron.sendRequest();
+  window.api.sendRequest();
 });
 
-electron.onResponse((data) => {
-  console.log("Received data:", data);
+window.api.onResponse((data) => {
+  // console.log("Received data:", data);
   document.getElementById("response").innerText = data.message;
+});
+
+document.getElementById("btnGetData").addEventListener("click", async () => {
+  const result = await window.api.getData();
+  console.log(data);
+});
+
+document.getElementById("btnInsertData").addEventListener("click", () => {
+  window.api.insertData();
 });
