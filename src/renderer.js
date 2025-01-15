@@ -28,20 +28,24 @@
 
 import "./index.css";
 
-document.getElementById("requestBtn").addEventListener("click", () => {
-  window.api.sendRequest();
-});
+// 미사용 샘플코드
+// document.getElementById("requestBtn").addEventListener("click", () => {
+//   window.api.sendRequest();
+// });
 
-window.api.onResponse((data) => {
-  // console.log("Received data:", data);
-  document.getElementById("response").innerText = data.message;
-});
+// window.api.onResponse((data) => {
+//   document.getElementById("response").innerText = data.message;
+// });
+// 미사용 샘플코드
 
 document.getElementById("btnGetData").addEventListener("click", async () => {
   const result = await window.api.getData();
-  console.log(data);
+
+  console.log(result);
 });
 
 document.getElementById("btnInsertData").addEventListener("click", () => {
-  window.api.insertData();
+  let inputInsertData = document.getElementById("inputInsertData").value;
+  window.api.insertData(inputInsertData);
+  document.getElementById("inputInsertData").value = "";
 });

@@ -2,14 +2,32 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>MES Sample PC Program</title>
   </head>
-  <body>
-    <h1>💖 Hello World!</h1>
-    <p class="underline">Welcome to your Electron application.</p>
-    <button id="requestBtn" class="text-3xl">send data</button>
-    <p id="response"></p>
-    <button id="btnGetData" class="text-3xl">get data</button>
-    <button id="btnInsertData" class="text-3xl">Insert data</button>
+  <body class="w-full h-full">
+    <div class="flex flex-col h-screen">
+      <section class="flex-none bg-slate-300 flex items-center p-4 border-b">
+        <input
+          type="text"
+          class="border-2 border-black rounded-md w-[200px] mr-1"
+          id="inputInsertData"
+        />
+        <button
+          id="btnInsertData"
+          class="border-2 border-black rounded-md px-2 mr-2"
+        >
+          데이터 입력하기
+        </button>
+        <button id="btnGetData" class="border-2 border-black rounded-md px-2">
+          데이터 불러오기
+        </button>
+      </section>
+      <section class="p-3 flex-1">
+        <h2 class="font-bold border-b">DATA LOG</h2>
+        <div id="divData" class="flex flex-col mt-2"></div>
+      </section>
+    </div>
+    <!-- <button id="requestBtn" class="text-3xl">send data</button>
+    <p id="response"></p> -->
   </body>
 </html>

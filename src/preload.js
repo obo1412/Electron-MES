@@ -7,5 +7,5 @@ contextBridge.exposeInMainWorld("api", {
   onResponse: (callback) =>
     ipcRenderer.on("response-data", (event, data) => callback(data)),
   getData: () => ipcRenderer.invoke("get-data"),
-  insertData: () => ipcRenderer.invoke("insert-data"),
+  insertData: (params) => ipcRenderer.send("insert-data", params),
 });

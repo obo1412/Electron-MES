@@ -1,56 +1,8 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
-import path from "node:path";
+// import path from "node:path";
 const sqlite3 = require("sqlite3").verbose();
-
 let db;
-
-// 데이터베이스 초기화
-function initializeDatabase() {
-  db = new sqlite3.Database("./database.db", (err) => {
-    if (err) {
-      console.error("데이터베이스 연결 오류", err.message);
-    } else {
-      console.log("데이터베이스에 연결되었습니다.");
-    }
-  });
-
-  db.run(`CREATE TABLE IF NOT EXISTS datalog
-    (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      content TEXT NOT NULL
-    )`);
-}
-
-function getData(res) {
-  const query = `SELECT * FROM datalog`;
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      console.error("사용자 조회 오류:", err.message);
-      res([]);
-    } else {
-      res(rows);
-    }
-  });
-}
-
-ipcMain.handle("get-data", (event) => {
-  // 요청 처리
-  return new Promise((resolve) => {
-    getData(resolve);
-  });
-});
-
-ipcMain.handle("insert-data", (event) => {
-  console.log("insert data received");
-  db.run(`INSERT INTO datalog ( content ) VALUES ( 'DDFDFDFDF' )`, (err) => {
-    if (err) {
-      return console.log(err.message);
-    } else {
-      console.log("A row has been inserted");
-    }
-  });
-});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -71,7 +23,7 @@ const createWindow = () => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
@@ -110,7 +62,61 @@ app.on("window-all-closed", () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
+// 미사용 샘플 코드
 ipcMain.on("request-data", (event) => {
   const data = { message: "Hello from main process!" };
   event.reply("response-data", data); // 데이터 전송
+});
+// 미사용 샘플 코드
+
+// 데이터베이스 초기화
+function initializeDatabase() {
+  db = new sqlite3.Database("./database.db", (err) => {
+    if (err) {
+      console.error("데이터베이스 연결 오류", err.message);
+    } else {
+      console.log("데이터베이스에 연결되었습니다.");
+    }
+  });
+
+  db.run(`CREATE TABLE IF NOT EXISTS datalog
+    (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      content TEXT NOT NULL
+    )`);
+}
+
+// get-data DB 통신 함수
+function getData(res) {
+  const query = `SELECT * FROM datalog`;
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      console.error("사용자 조회 오류:", err.message);
+      res([]);
+    } else {
+      res(rows);
+    }
+  });
+}
+
+// get-data 요청 처리
+ipcMain.handle("get-data", (event) => {
+  return new Promise((resolve) => {
+    getData(resolve);
+  });
+});
+
+// insert-data DB 통신 함수
+function addData(params) {
+  const query = `INSERT INTO datalog ( content ) VALUES ( ? )`;
+  db.run(query, [params], (err) => {
+    if (err) {
+      return console.log(err.message);
+    }
+  });
+}
+
+// insert-data 요청 처리
+ipcMain.on("insert-data", (event, params) => {
+  addData(params);
 });
