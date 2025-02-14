@@ -6,7 +6,9 @@
   </head>
   <body class="w-full h-full">
     <div class="flex flex-col h-screen">
-      <section class="flex-none bg-slate-300 flex items-center p-4 border-b">
+      <section
+        class="flex-none bg-slate-300 flex items-center p-4 border-b fixed w-full"
+      >
         <input
           type="text"
           class="border-2 border-black rounded-md w-[200px] mr-1"
@@ -22,9 +24,14 @@
           데이터 불러오기
         </button>
       </section>
-      <section class="p-3 flex-1">
+      <section class="p-3 flex-1 mt-[50px]">
         <h2 class="font-bold border-b">DATA LOG</h2>
-        <div id="divData" class="flex flex-col mt-2"></div>
+        <table id="content__table" class="flex flex-col mt-2" width="100%">
+          <tr class="">
+            <th>No.</th>
+            <th>Content</th>
+          </tr>
+        </table>
       </section>
     </div>
     <!-- <button id="requestBtn" class="text-3xl">send data</button>

@@ -49,3 +49,20 @@ document.getElementById("btnInsertData").addEventListener("click", () => {
   window.api.insertData(inputInsertData);
   document.getElementById("inputInsertData").value = "";
 });
+
+window.addEventListener("load", async () => {
+  // DB에서 데이터 값 호출하기
+  const result = await window.api.getData();
+  const contentTable = document.getElementById("content__table");
+  // 데이터가 들어갈 태그 호출
+  for (const data of result) {
+    const new_tr = document.createElement("tr");
+    const new_td_id = document.createElement("td");
+    const new_td_content = document.createElement("td");
+    new_td_id.innerHTML = data.id;
+    new_tr.append(new_td_id);
+    new_td_content.innerHTML = data.content;
+    new_tr.append(new_td_content);
+    contentTable.append(new_tr);
+  }
+});
