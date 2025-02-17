@@ -85,7 +85,7 @@ window.addEventListener("load", async () => {
 });
 
 // DB insert 후 결과값 받기
-window.api.insertResult((data) => {
+window.api.receivedDataFromPLC((data) => {
   // data 0 이면 입력 안됨. 1 이상이면 입력됨.
   let regDate = new Date();
   regDate = utils.timeFormmatter(regDate);

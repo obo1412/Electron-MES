@@ -1,8 +1,11 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, webContents } from "electron";
 import started from "electron-squirrel-startup";
+// Socket 통신을 위한 라이브러리 net
+const net = require("net");
 // import path from "node:path";
 const sqlite3 = require("sqlite3").verbose();
 let db;
+let mainWindow;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -11,7 +14,7 @@ if (started) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -118,8 +121,33 @@ function addData(params) {
   });
 }
 
-// insert-data 요청 처리
+// insert-data 요청 처리 Renderer에서 insert-data 신호를 받아야 동작함.
 ipcMain.on("insert-data", async (event, params) => {
   const insertResult = await addData(params);
   event.sender.send("insert-result", insertResult);
+});
+
+/*
+  PLC와 Socket 통신
+*/
+const server = net.createServer((socket) => {
+  socket.on("data", async (data) => {
+    // console.log("받은 데이터: " + data.toString());
+    const receivedDataFromPLC = await addData(data);
+    // 저장된 데이터 불러와서 메인화면으로 뿌려주기 처리 수정해야함.
+    mainWindow.webContents.send("received-data-from-plc", receivedDataFromPLC);
+  });
+
+  socket.on("end", () => {
+    console.log("연결 끊김.");
+  });
+
+  socket.on("error", (err) => {
+    console.error("Socket 오류: ", err);
+  });
+});
+
+const socketPORT = 9600; //소켓 포트 번호
+server.listen(socketPORT, () => {
+  console.log(`서버가 포트 ${socketPORT}에서 대기중입니다.`);
 });

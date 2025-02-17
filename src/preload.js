@@ -11,4 +11,6 @@ contextBridge.exposeInMainWorld("api", {
   insertData: (params) => ipcRenderer.send("insert-data", params),
   insertResult: (callback) =>
     ipcRenderer.on("insert-result", (event, data) => callback(data)),
+  receivedDataFromPLC: (callback) =>
+    ipcRenderer.on("received-data-from-plc", (event, data) => callback(data)),
 });
