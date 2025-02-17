@@ -20,16 +20,21 @@
         >
           데이터 입력하기
         </button>
-        <button id="btnGetData" class="border-2 border-black rounded-md px-2">
+        <!-- <button id="btnGetData" class="border-2 border-black rounded-md px-2">
           데이터 불러오기
-        </button>
+        </button> -->
       </section>
       <section class="p-3 flex-1 mt-[50px]">
         <h2 class="font-bold border-b">DATA LOG</h2>
-        <table id="content__table" class="flex flex-col mt-2" width="100%">
-          <tr class="">
-            <th>No.</th>
-            <th>Content</th>
+        <table
+          id="content__table"
+          class="flex flex-col border p-2"
+          width="100%"
+        >
+          <tr class="flex">
+            <th class="w-[60px]">No.</th>
+            <th class="w-[180px]">Time</th>
+            <th class="flex-1">Content</th>
           </tr>
         </table>
       </section>

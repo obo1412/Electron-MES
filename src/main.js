@@ -74,14 +74,13 @@ function initializeDatabase() {
   db = new sqlite3.Database("./database.db", (err) => {
     if (err) {
       console.error("데이터베이스 연결 오류", err.message);
-    } else {
-      console.log("데이터베이스에 연결되었습니다.");
     }
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS datalog
     (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reg_date TIMESTAMP DEFAULT (DATETIME('now', 'localtime')),
       content TEXT NOT NULL
     )`);
 }
@@ -109,14 +108,18 @@ ipcMain.handle("get-data", (event) => {
 // insert-data DB 통신 함수
 function addData(params) {
   const query = `INSERT INTO datalog ( content ) VALUES ( ? )`;
-  db.run(query, [params], (err) => {
-    if (err) {
-      return console.log(err.message);
-    }
+  return new Promise((resolve, reject) => {
+    db.run(query, [params], function (err) {
+      if (err) {
+        reject(console.log(err.message));
+      }
+      resolve([this.changes, this.lastID]);
+    });
   });
 }
 
 // insert-data 요청 처리
-ipcMain.on("insert-data", (event, params) => {
-  addData(params);
+ipcMain.on("insert-data", async (event, params) => {
+  const insertResult = await addData(params);
+  event.sender.send("insert-result", insertResult);
 });
