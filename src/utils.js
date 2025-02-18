@@ -9,3 +9,8 @@ export function timeFormmatter(currentTime) {
   const result = thisDate + " " + thisTime;
   return result;
 }
+
+export async function bufferToString(data) {
+  const result = (await data) instanceof Buffer ? data.toString("utf-8") : data;
+  return result;
+}

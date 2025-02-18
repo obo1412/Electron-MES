@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, webContents } from "electron";
 import started from "electron-squirrel-startup";
+import * as Utils from "./utils";
 // Socket 통신을 위한 라이브러리 net
 const net = require("net");
 // import path from "node:path";
@@ -89,7 +90,7 @@ function initializeDatabase() {
 }
 
 // get-data DB 통신 함수
-function getData(res) {
+function getAllData(res) {
   const query = `SELECT * FROM datalog`;
   db.all(query, [], (err, rows) => {
     if (err) {
@@ -101,10 +102,10 @@ function getData(res) {
   });
 }
 
-// get-data 요청 처리
-ipcMain.handle("get-data", (event) => {
+// get-all-data 요청 처리
+ipcMain.handle("get-all-data", (event) => {
   return new Promise((resolve) => {
-    getData(resolve);
+    getAllData(resolve);
   });
 });
 
@@ -121,6 +122,26 @@ function addData(params) {
   });
 }
 
+// db.all()은 결과 전체
+// id로 저장된 데이터 불러오기
+function getOneData(params) {
+  const query = `SELECT * FROM datalog WHERE id = $id`;
+  return new Promise((resolve, reject) => {
+    try {
+      db.get(query, params, async (err, row) => {
+        const content = await Utils.bufferToString(row.content);
+        row = {
+          ...row,
+          content: content,
+        };
+        resolve(row);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // insert-data 요청 처리 Renderer에서 insert-data 신호를 받아야 동작함.
 ipcMain.on("insert-data", async (event, params) => {
   const insertResult = await addData(params);
@@ -132,13 +153,13 @@ ipcMain.on("insert-data", async (event, params) => {
 */
 const server = net.createServer((socket) => {
   socket.on("data", async (data) => {
-    // console.log("받은 데이터: " + data.toString());
     const receivedDataFromPLC = await addData(data);
+    const getUpdatedData = await getOneData({ $id: receivedDataFromPLC[1] });
     // 저장된 데이터 불러와서 메인화면으로 뿌려주기 처리 수정해야함.
-    mainWindow.webContents.send("received-data-from-plc", receivedDataFromPLC);
+    mainWindow.webContents.send("received-data-from-plc", getUpdatedData);
   });
 
-  socket.on("end", () => {
+  socket.on("close", () => {
     console.log("연결 끊김.");
   });
 

@@ -27,11 +27,9 @@
  */
 
 import "./index.css";
-import * as utils from "./utils";
 
 // 전역변수
 const contentTable = document.getElementById("content__table");
-let updateData;
 
 const createNewTd = (width, value) => {
   const new_td = document.createElement("td");
@@ -58,17 +56,19 @@ const createNewTd = (width, value) => {
 //   console.log(result);
 // });
 
-document.getElementById("btnInsertData").addEventListener("click", () => {
-  let inputInsertData = document.getElementById("inputInsertData").value;
-  // 현재 테이블 값에 데이터를 올리기 위한 임시 변수 공간.
-  updateData = inputInsertData;
-  window.api.insertData(inputInsertData);
-  document.getElementById("inputInsertData").value = "";
-});
+// document.getElementById("btnInsertData").addEventListener("click", () => {
+//   let inputInsertData = document.getElementById("inputInsertData").value;
+//   if (inputInsertData.trim() === "" || inputInsertData === null) {
+//     return alert("데이터 없음");
+//   }
+//   // 현재 테이블 값에 데이터를 올리기 위한 임시 변수 공간.
+//   window.api.insertData(inputInsertData);
+//   document.getElementById("inputInsertData").value = "";
+// });
 
 window.addEventListener("load", async () => {
   // DB에서 데이터 값 호출하기
-  const result = await window.api.getData();
+  const result = await window.api.getAllData();
   // 데이터가 들어갈 태그 호출
   for (const data of result) {
     const new_tr = document.createElement("tr");
@@ -76,7 +76,7 @@ window.addEventListener("load", async () => {
     const new_td_id = createNewTd(60, data.id);
     const new_td_regDate = createNewTd(180, data.reg_date);
     const new_td_content = createNewTd(0, data.content);
-    // new_td_content.classList.add("flex-1");
+
     new_tr.append(new_td_id);
     new_tr.append(new_td_regDate);
     new_tr.append(new_td_content);
@@ -87,20 +87,18 @@ window.addEventListener("load", async () => {
 // DB insert 후 결과값 받기
 window.api.receivedDataFromPLC((data) => {
   // data 0 이면 입력 안됨. 1 이상이면 입력됨.
-  let regDate = new Date();
-  regDate = utils.timeFormmatter(regDate);
+  // let regDate = new Date();
+  // regDate = utils.timeFormmatter(regDate);
 
-  if (data[0] > 0) {
+  if (data.id !== null || data.id !== 0) {
     const new_tr = document.createElement("tr");
-    const new_td_id = createNewTd(60, data[1]);
-    const new_td_regDate = createNewTd(180, regDate);
-    const new_td_content = createNewTd(0, updateData);
+    const new_td_id = createNewTd(60, data.id);
+    const new_td_regDate = createNewTd(180, data.reg_date);
+    const new_td_content = createNewTd(0, data.content);
 
     new_tr.append(new_td_id);
     new_tr.append(new_td_regDate);
     new_tr.append(new_td_content);
     contentTable.append(new_tr);
-
-    updateData = "";
   }
 });
