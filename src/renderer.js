@@ -29,13 +29,11 @@
 import "./index.css";
 
 // 전역변수
-const contentTable = document.getElementById("content__table");
+const contentTable = document.getElementById("content_table");
 
-const createNewTd = (width, value) => {
+const createNewTd = (className, value) => {
   const new_td = document.createElement("td");
-  if (width != 0) {
-    new_td.setAttribute("class", `w-[${width}px]`);
-  }
+  new_td.setAttribute("class", className);
   new_td.innerHTML = value;
   return new_td;
 };
@@ -72,10 +70,10 @@ window.addEventListener("load", async () => {
   // 데이터가 들어갈 태그 호출
   for (const data of result) {
     const new_tr = document.createElement("tr");
-    new_tr.classList.add("flex");
-    const new_td_id = createNewTd(60, data.id);
-    const new_td_regDate = createNewTd(180, data.reg_date);
-    const new_td_content = createNewTd(0, data.content);
+
+    const new_td_id = createNewTd("td__id", data.id);
+    const new_td_regDate = createNewTd("td__regDate", data.reg_date);
+    const new_td_content = createNewTd("td__content", data.content);
 
     new_tr.append(new_td_id);
     new_tr.append(new_td_regDate);
@@ -88,10 +86,10 @@ window.addEventListener("load", async () => {
 window.api.initWindow((result) => {
   for (const data of result) {
     const new_tr = document.createElement("tr");
-    new_tr.classList.add("flex");
-    const new_td_id = createNewTd(60, data.id);
-    const new_td_regDate = createNewTd(180, data.reg_date);
-    const new_td_content = createNewTd(0, data.content);
+
+    const new_td_id = createNewTd("td__id", data.id);
+    const new_td_regDate = createNewTd("td__regDate", data.reg_date);
+    const new_td_content = createNewTd("td__content", data.content);
 
     new_tr.append(new_td_id);
     new_tr.append(new_td_regDate);
@@ -108,13 +106,19 @@ window.api.receivedDataFromPLC((data) => {
 
   if (data.id !== null || data.id !== 0) {
     const new_tr = document.createElement("tr");
-    const new_td_id = createNewTd(60, data.id);
-    const new_td_regDate = createNewTd(180, data.reg_date);
-    const new_td_content = createNewTd(0, data.content);
+    const new_td_id = createNewTd("td__id", data.id);
+    const new_td_regDate = createNewTd("td__regDate", data.reg_date);
+    const new_td_content = createNewTd("td__content", data.content);
 
     new_tr.append(new_td_id);
     new_tr.append(new_td_regDate);
     new_tr.append(new_td_content);
     contentTable.append(new_tr);
   }
+});
+
+// 데이터 excel or csv로 내보내기
+const btnExportData = document.querySelector("#export_data");
+btnExportData.addEventListener("click", () => {
+  window.api.exportDataToExcel();
 });

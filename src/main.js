@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, webContents } from "electron";
 import started from "electron-squirrel-startup";
 import * as Utils from "./utils";
+import * as XLSX from "xlsx";
 // Socket 통신을 위한 라이브러리 net
 const net = require("net");
 // import path from "node:path";
@@ -188,3 +189,34 @@ const socketPORT = 9600; //소켓 포트 번호
 server.listen(socketPORT, () => {
   console.log(`서버가 포트 ${socketPORT}에서 대기중입니다.`);
 });
+
+// export data to excel
+ipcMain.handle("export-data-to-excel", async (event) => {
+  excelDownload(exampleData, "test");
+});
+
+// 에러 뜨는데 확인해서 수정하기.
+export const excelDownload = (data, fileName) => {
+  const excelFileName = `${fileName}.xlsx`;
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+  XLSX.writeFile(wb, excelFileName);
+};
+
+const exampleData = [
+  {
+    주문번호: 1,
+    주문인: "지원",
+    주문상품: "물병1",
+    결제금액: 2000,
+  },
+  {
+    주문번호: 2,
+    주문인: "조이",
+    주문상품: "컵1",
+    결제금액: 3000,
+  },
+];

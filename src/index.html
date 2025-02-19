@@ -6,10 +6,10 @@
   </head>
   <body class="w-full h-full">
     <div class="flex flex-col h-screen">
-      <!-- <section
-        class="flex-none bg-slate-300 flex items-center p-4 border-b fixed w-full"
+      <section
+        class="flex flex-none items-center justify-between w-full px-4 pb-2"
       >
-        <input
+        <!-- <input
           type="text"
           class="border-2 border-black rounded-md w-[200px] mr-1"
           id="inputInsertData"
@@ -22,19 +22,21 @@
         </button>
         <button id="btnGetData" class="border-2 border-black rounded-md px-2">
           데이터 불러오기
-        </button>
-      </section> -->
-      <section class="p-3 flex-1 mt-[50px]">
-        <h2 class="font-bold border-b">DATA LOG</h2>
-        <table
-          id="content__table"
-          class="flex flex-col border p-2"
-          width="100%"
+        </button> -->
+        <h2 class="font-bold">DATA LOG</h2>
+        <button
+          id="export_data"
+          class="border rounded-md px-2 py-1 bg-slate-200 hover:bg-slate-100 font-bold active:border-slate-800"
         >
-          <tr class="flex w-full">
-            <th class="w-[60px]">No.</th>
-            <th class="w-[180px]">Time</th>
-            <th class="flex-1">Content</th>
+          Export Data
+        </button>
+      </section>
+      <section class="px-3 w-full overflow-auto">
+        <table id="content_table" class="table__data w-full">
+          <tr class="tr__th">
+            <th class="th__id bg-slate-100">No.</th>
+            <th class="th__regDate bg-slate-200">Time</th>
+            <th class="th__content bg-slate-300">Content</th>
           </tr>
         </table>
       </section>

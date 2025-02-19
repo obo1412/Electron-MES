@@ -15,4 +15,5 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on("insert-result", (event, data) => callback(data)),
   receivedDataFromPLC: (callback) =>
     ipcRenderer.on("received-data-from-plc", (event, data) => callback(data)),
+  exportDataToExcel: () => ipcRenderer.invoke("export-data-to-excel"),
 });
