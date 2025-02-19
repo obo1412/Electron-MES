@@ -96,12 +96,22 @@ function initializeDatabase() {
 function getAllData(params) {
   const query = `SELECT * FROM datalog`;
   return new Promise((resolve, reject) => {
-    db.all(query, [], (err, rows) => {
+    db.all(query, [], async (err, rows) => {
       if (err) {
         reject(console.error("사용자 조회 오류:", err.message));
-      } else {
-        resolve(rows);
+        return;
       }
+
+      let result = [];
+      for (const row of rows) {
+        const content2 = await Utils.bufferToString(row.content);
+        const modiRow = {
+          ...row,
+          content: content2,
+        };
+        result.push(modiRow);
+      }
+      resolve(result);
     });
   });
 }

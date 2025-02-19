@@ -26,7 +26,6 @@
  * ```
  */
 
-import { data } from "autoprefixer";
 import "./index.css";
 
 // 전역변수
