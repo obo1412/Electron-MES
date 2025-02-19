@@ -33,9 +33,12 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   initializeDatabase();
   createWindow();
+
+  const allData = await getAllData();
+  mainWindow.webContents.send("init-window", allData);
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -90,23 +93,26 @@ function initializeDatabase() {
 }
 
 // get-data DB 통신 함수
-function getAllData(res) {
+function getAllData(params) {
   const query = `SELECT * FROM datalog`;
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      console.error("사용자 조회 오류:", err.message);
-      res([]);
-    } else {
-      res(rows);
-    }
+  return new Promise((resolve, reject) => {
+    db.all(query, [], (err, rows) => {
+      if (err) {
+        reject(console.error("사용자 조회 오류:", err.message));
+      } else {
+        resolve(rows);
+      }
+    });
   });
 }
 
-// get-all-data 요청 처리
-ipcMain.handle("get-all-data", (event) => {
-  return new Promise((resolve) => {
-    getAllData(resolve);
-  });
+// get-all-data 요청 처리 - page refresh 때 호출
+ipcMain.handle("get-all-data", async (event) => {
+  // return new Promise((resolve) => {
+  //   getAllData(resolve);
+  // });
+  const result = await getAllData();
+  return result;
 });
 
 // insert-data DB 통신 함수

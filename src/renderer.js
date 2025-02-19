@@ -26,6 +26,7 @@
  * ```
  */
 
+import { data } from "autoprefixer";
 import "./index.css";
 
 // 전역변수
@@ -68,8 +69,24 @@ const createNewTd = (width, value) => {
 
 window.addEventListener("load", async () => {
   // DB에서 데이터 값 호출하기
-  const result = await window.api.getAllData();
+  const result = await window.api.refreshWindow();
   // 데이터가 들어갈 태그 호출
+  for (const data of result) {
+    const new_tr = document.createElement("tr");
+    new_tr.classList.add("flex");
+    const new_td_id = createNewTd(60, data.id);
+    const new_td_regDate = createNewTd(180, data.reg_date);
+    const new_td_content = createNewTd(0, data.content);
+
+    new_tr.append(new_td_id);
+    new_tr.append(new_td_regDate);
+    new_tr.append(new_td_content);
+    contentTable.append(new_tr);
+  }
+});
+
+// 화면 불러오면 최초 한번 처리
+window.api.initWindow((result) => {
   for (const data of result) {
     const new_tr = document.createElement("tr");
     new_tr.classList.add("flex");
