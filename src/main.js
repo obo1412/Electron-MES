@@ -191,7 +191,7 @@ server.listen(socketPORT, () => {
 });
 
 // export data to excel
-ipcMain.handle("export-data-to-excel", async (event) => {
+ipcMain.handle("export-data-to-excel", (event) => {
   excelDownload(exampleData, "test");
 });
 
