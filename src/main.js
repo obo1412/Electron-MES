@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, webContents } from "electron";
 import started from "electron-squirrel-startup";
-import * as Utils from "./utils";
+import * as Utils from "./utils/utils";
 import * as XLSX from "xlsx";
 import * as fs from "fs";
 XLSX.set_fs(fs);
@@ -8,8 +8,9 @@ XLSX.set_fs(fs);
 const net = require("net");
 // import path from "node:path";
 const path = require("path");
-const sqlite3 = require("sqlite3").verbose();
-let db;
+import * as dbConfig from "./config/dbconfig";
+import * as Service from "./services/services";
+
 let mainWindow;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -38,11 +39,11 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  initializeDatabase();
+  dbConfig.initializeDatabase();
   createWindow();
 
-  const allData = await getAllData();
-  mainWindow.webContents.send("init-window", allData);
+  // const allData = await Service.getAllData();
+  // mainWindow.webContents.send("init-window", allData);
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -57,8 +58,8 @@ app.whenReady().then(async () => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
-  if (db) {
-    db.close((err) => {
+  if (dbConfig.db) {
+    dbConfig.db.close((err) => {
       if (err) {
         console.error("데이터베이스 종료 오류:", err.message);
       }
@@ -80,91 +81,18 @@ ipcMain.on("request-data", (event) => {
 });
 // 미사용 샘플 코드
 
-// 데이터베이스 초기화
-function initializeDatabase() {
-  db = new sqlite3.Database("./database.db", (err) => {
-    if (err) {
-      console.error("데이터베이스 연결 오류", err.message);
-    }
-  });
-
-  db.run(`CREATE TABLE IF NOT EXISTS datalog
-    (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      reg_date TIMESTAMP DEFAULT (DATETIME('now', 'localtime')),
-      content TEXT NOT NULL
-    )`);
-}
-
-// get-data DB 통신 함수
-function getAllData(params) {
-  const query = `SELECT * FROM datalog`;
-  return new Promise((resolve, reject) => {
-    db.all(query, [], async (err, rows) => {
-      if (err) {
-        reject(console.error("사용자 조회 오류:", err.message));
-        return;
-      }
-
-      let result = [];
-      for (const row of rows) {
-        const content2 = await Utils.bufferToString(row.content);
-        const modiRow = {
-          ...row,
-          content: content2,
-        };
-        result.push(modiRow);
-      }
-      resolve(result);
-    });
-  });
-}
-
 // get-all-data 요청 처리 - page refresh 때 호출
 ipcMain.handle("get-all-data", async (event) => {
   // return new Promise((resolve) => {
   //   getAllData(resolve);
   // });
-  const result = await getAllData();
+  const result = await Service.getAllData();
   return result;
 });
 
-// insert-data DB 통신 함수
-function addData(params) {
-  const query = `INSERT INTO datalog ( content ) VALUES ( ? )`;
-  return new Promise((resolve, reject) => {
-    db.run(query, [params], function (err) {
-      if (err) {
-        reject(console.log(err.message));
-      }
-      resolve([this.changes, this.lastID]);
-    });
-  });
-}
-
-// db.all()은 결과 전체
-// id로 저장된 데이터 불러오기
-function getOneData(params) {
-  const query = `SELECT * FROM datalog WHERE id = $id`;
-  return new Promise((resolve, reject) => {
-    try {
-      db.get(query, params, async (err, row) => {
-        const content = await Utils.bufferToString(row.content);
-        row = {
-          ...row,
-          content: content,
-        };
-        resolve(row);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
 // insert-data 요청 처리 Renderer에서 insert-data 신호를 받아야 동작함.
 ipcMain.on("insert-data", async (event, params) => {
-  const insertResult = await addData(params);
+  const insertResult = await Service.addData(params);
   event.sender.send("insert-result", insertResult);
 });
 
@@ -173,8 +101,11 @@ ipcMain.on("insert-data", async (event, params) => {
 */
 const server = net.createServer((socket) => {
   socket.on("data", async (data) => {
-    const receivedDataFromPLC = await addData(data);
-    const getUpdatedData = await getOneData({ $id: receivedDataFromPLC[1] });
+    console.log(data);
+    const receivedDataFromPLC = await Service.addData(data);
+    const getUpdatedData = await Service.getOneData({
+      $id: receivedDataFromPLC[1],
+    });
     // 저장된 데이터 불러와서 메인화면으로 뿌려주기 처리 수정해야함.
     mainWindow.webContents.send("received-data-from-plc", getUpdatedData);
   });
@@ -193,23 +124,9 @@ server.listen(socketPORT, () => {
   console.log(`서버가 포트 ${socketPORT}에서 대기중입니다.`);
 });
 
-const exampleData = [
-  {
-    주문번호: 1,
-    주문인: "지원",
-    주문상품: "물병1",
-    결제금액: 2000,
-  },
-  {
-    주문번호: 2,
-    주문인: "조이",
-    주문상품: "컵1",
-    결제금액: 3000,
-  },
-];
-
 // export data to excel
-ipcMain.handle("export-data-to-excel", (event) => {
+ipcMain.handle("export-data-to-excel", async (event) => {
+  const exampleData = await Service.getAllData();
   excelDownload(exampleData, "test");
 });
 
@@ -221,5 +138,5 @@ const excelDownload = (data, fileName) => {
   const worksheet = XLSX.utils.json_to_sheet(data);
   XLSX.utils.book_append_sheet(workbook, worksheet, "sheet1");
 
-  XLSX.writeFile(workbook, path.join(__dirname, excelFileName));
+  XLSX.writeFile(workbook, path.join("./", excelFileName));
 };

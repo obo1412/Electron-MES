@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on("init-window", (event, data) => callback(data)),
   refreshWindow: () => ipcRenderer.invoke("get-all-data"),
   getOneData: () => ipcRenderer.invoke("get-one-data"),
-  insertData: (params) => ipcRenderer.send("insert-data", params),
+  // insertData: (params) => ipcRenderer.send("insert-data", params),
   insertResult: (callback) =>
     ipcRenderer.on("insert-result", (event, data) => callback(data)),
   receivedDataFromPLC: (callback) =>
