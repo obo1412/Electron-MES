@@ -119,7 +119,7 @@ const server = net.createServer((socket) => {
   });
 });
 
-const socketPORT = 9600; //소켓 포트 번호
+const socketPORT = 2004; //소켓 포트 번호
 server.listen(socketPORT, () => {
   console.log(`서버가 포트 ${socketPORT}에서 대기중입니다.`);
 });
